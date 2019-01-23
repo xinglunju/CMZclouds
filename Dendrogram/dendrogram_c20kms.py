@@ -4,8 +4,9 @@
 # : self._colorbar_axes.tick_params(pad=-24,length=7)
 
 import numpy as np
-from astrodendro import Dendrogram
+from astrodendro import Dendrogram, pp_catalog
 from astropy.io import fits
+from astropy import units as u
 import aplpy
 
 import matplotlib.pyplot as plt
@@ -39,6 +40,16 @@ for leaf in d.leaves:
 
 print 'Number of leaves:', np.size(leaves_repro)
 
+metadata = {}
+metadata['data_unit'] = u.Jy / u.beam
+metadata['spatial_scale'] =  0.8 * u.arcsec
+metadata['beam_major'] =  4.87 * u.arcsec
+metadata['beam_minor'] =  2.78 * u.arcsec
+cat = pp_catalog(leaves_repro, metadata)
+#cat.pprint(show_unit=True, max_lines=200)
+fluxes = cat['flux'].data
+
+
 # Create empty mask. For each leaf we do an 'or' operation with the mask so
 # that any pixel corresponding to a leaf is set to True.
 mask = np.zeros(hdu.data.shape, dtype=bool)
@@ -55,7 +66,7 @@ mask_hdu = fits.PrimaryHDU(mask.astype('short'), hdu.header)
 fig = plt.figure(figsize=(5.8, 8))
 
 mc = [266.4055, -29.085]
-dist = 8.34 # kpc
+dist = 8.1 # kpc
 f1 = aplpy.FITSFigure(hdu,figure=fig,subplot=[0.18,0.08,0.76,0.88])
 f1.show_colorscale(cmap='gist_heat_r', vmax=0.196, vmin=0.010, aspect='equal')
 f1.show_contour(mask_hdu, colors='blue', linewidths=1.0)
